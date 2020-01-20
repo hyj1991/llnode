@@ -486,7 +486,14 @@ std::string Printer::Stringify(v8::Map map, Error& err) {
   }
   if (err.Fail()) return std::string();
 
-  int64_t instance_size = map.InstanceSize(err);
+  int64_t instance_size;
+  if (map.IsJSObjectMap(err)) {
+    v8::HeapObject map_object = map.GetMap(err);
+    v8::Map map(map_object);
+    instance_size = map.InstanceSize(err);
+  } else {
+    instance_size = map.InstanceSize(err);
+  }
   if (err.Fail()) return std::string();
 
   char tmp[256];
